@@ -6,6 +6,7 @@ import org.apache.spark.sql.types._
 
 package object analytics {
   type Category = String
+  type ProductName = String
 
   object Event {
     def schema: StructType = StructType(
