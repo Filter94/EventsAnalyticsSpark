@@ -2,6 +2,7 @@ package com.griddynamics.analytics
 
 import com.griddynamics.analytics.SparkContextKeeper.spark
 import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.functions._
 import spark.implicits._
 import org.apache.spark.sql.functions.udf
@@ -10,6 +11,9 @@ object DsEventsAndGeoDataAnalytics {
   def apply(events: Dataset[Event], cb: Dataset[CountryBlock],
             cl: Dataset[CountryLocation]): DsEventsAndGeoDataAnalytics =
     new DsEventsAndGeoDataAnalytics(events, cb, cl)
+
+  val ipInNetFunc: (Ip, Network) => Boolean = Helper.ipInNet
+  val ipInNetUdf: UserDefinedFunction = udf(ipInNetFunc)
 }
 
 class DsEventsAndGeoDataAnalytics(events: Dataset[Event], cb: Dataset[CountryBlock], cl: Dataset[CountryLocation]) {
@@ -19,12 +23,9 @@ class DsEventsAndGeoDataAnalytics(events: Dataset[Event], cb: Dataset[CountryBlo
       .select($"network".as[Network], $"country_name".as[CountryName])
   }
 
-  val func: (Ip, Network) => Boolean = Helper.ipInNet
-  val ipInNet = udf(func)
-
   def necessaryJoinedEventsDataWithGeodata(): Dataset[(ProductPrice, CountryName)] = {
     events.join(necessaryJoinedGeodata(),
-      ipInNet($"clientIp".as[Ip], $"network".as[Network]))
+      DsEventsAndGeoDataAnalytics.ipInNetUdf($"clientIp".as[Ip], $"network".as[Network]))
       .select($"productPrice".as[ProductPrice], $"country_name".as[CountryName])
   }
 }
