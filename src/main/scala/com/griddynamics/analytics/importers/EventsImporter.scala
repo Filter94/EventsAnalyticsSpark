@@ -1,6 +1,7 @@
-package com.griddynamics.analytics
+package com.griddynamics.analytics.importers
 
-import SparkContextKeeper.spark
+import com.griddynamics.analytics.Event
+import com.griddynamics.analytics.SparkContextKeeper.spark
 import org.apache.spark.sql.Dataset
 import spark.implicits._
 

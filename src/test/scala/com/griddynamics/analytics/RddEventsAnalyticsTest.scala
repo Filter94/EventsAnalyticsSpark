@@ -1,9 +1,10 @@
 package com.griddynamics.analytics
 
+import com.griddynamics.analytics.importers.EventsImporter
 import org.scalatest.FunSuite
 
-class RddAnalyticsTest extends FunSuite with TestEventsImporter {
-  val analytics = RddAnalytics(importer.importData().rdd)
+class RddEventsAnalyticsTest extends FunSuite with TrivialEventsImporter {
+  val analytics = RddEventsAnalytics(importer.importData().rdd)
 
   test("topCategories RDD works well on trivial input") {
     val result = analytics.topCategories().collect()
@@ -13,7 +14,7 @@ class RddAnalyticsTest extends FunSuite with TestEventsImporter {
 
   test("top10ByCategory RDD works well on trivial input") {
     val result = analytics.top10ByCategory().collect()
-    val expected: Set[(Category, ProductName, RddAnalytics.Purchases)] = Set(
+    val expected: Set[(Category, ProductName, RddEventsAnalytics.Purchases)] = Set(
       ("category 1", "product name 1", 1),
       ("category 1", "product name 2", 1),
       ("category 2", "product name 3", 1))
@@ -22,8 +23,8 @@ class RddAnalyticsTest extends FunSuite with TestEventsImporter {
   }
 
   test("top10ByCategory RDD works well on some more complex input") {
-    val complexCasePath = getClass.getResource("/complex_case").getPath
-    val analytics = RddAnalytics(EventsImporter(complexCasePath).importData().rdd)
+    val complexCasePath = getClass.getResource("/events/complex.csv").getPath
+    val analytics = RddEventsAnalytics(EventsImporter(complexCasePath).importData().rdd)
     val result = analytics.top10ByCategory().collect()
     assert(result.length == 14)
     val category1 = result.filter{case (category, _, _) => category == "category 1"}

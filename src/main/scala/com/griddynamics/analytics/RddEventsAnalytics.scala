@@ -2,16 +2,14 @@ package com.griddynamics.analytics
 
 import org.apache.spark.rdd.RDD
 
-import scala.collection.mutable
-
-object RddAnalytics {
+object RddEventsAnalytics {
   type Purchases = Int
 
-  def apply(events: RDD[Event]): RddAnalytics = new RddAnalytics(events)
+  def apply(events: RDD[Event]): RddEventsAnalytics = new RddEventsAnalytics(events)
 }
 
-class RddAnalytics(events: RDD[Event]) {
-  def topCategories(): RDD[(Category, RddAnalytics.Purchases)] = {
+class RddEventsAnalytics(events: RDD[Event]) {
+  def topCategories(): RDD[(Category, RddEventsAnalytics.Purchases)] = {
     events
       .groupBy(e => e.productCategory)
       .map {
@@ -23,7 +21,7 @@ class RddAnalytics(events: RDD[Event]) {
       }
   }
 
-  def top10ByCategory(): RDD[(Category, ProductName, RddAnalytics.Purchases)] = {
+  def top10ByCategory(): RDD[(Category, ProductName, RddEventsAnalytics.Purchases)] = {
     val productPurchasesByCategory = for {
       (category, group) <- events.groupBy(e => e.productCategory)
       (productName, productGroup) <- group.groupBy(e => e.productName)
