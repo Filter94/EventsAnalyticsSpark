@@ -6,12 +6,12 @@ import org.scalatest.FunSuite
 
 class EventsImporterTest extends FunSuite with TrivialEventsImporter {
   test("All events are imported") {
-    assert(importer.importData().count() == 3)
+    assert(eventsImporter.importData().count() == 3)
   }
 
   test("Events imported correctly.") {
     val expectedEvent = Event("product name 1", 123.123f, Timestamp.valueOf("2018-09-11 12:00:00.123"),
       "category 1", "127.0.0.1")
-    assert(importer.importData().collect()(0) == expectedEvent)
+    assert(eventsImporter.importData().collect()(0) == expectedEvent)
   }
 }

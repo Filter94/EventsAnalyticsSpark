@@ -4,7 +4,7 @@ import com.griddynamics.analytics.importers.EventsImporter
 import org.scalatest.FunSuite
 
 class RddEventsAnalyticsTest extends FunSuite with TrivialEventsImporter {
-  val analytics = RddEventsAnalytics(importer.importData().rdd)
+  val analytics = RddEventsAnalytics(eventsImporter.importData().rdd)
 
   test("topCategories RDD works well on trivial input") {
     val result = analytics.topCategories().collect()

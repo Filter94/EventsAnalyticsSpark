@@ -7,6 +7,8 @@ import org.apache.spark.sql.types._
 package object analytics {
   type Category = String
   type ProductName = String
+  type ProductPrice = Float
+  type Ip = String
 
   object Event {
     val schema: StructType = StructType(
@@ -20,8 +22,8 @@ package object analytics {
     )
   }
 
-  case class Event(productName: String, productPrice: Float, purchaseDate: Timestamp,
-                   productCategory: String, clientIp: String)
+  case class Event(productName: String, productPrice: ProductPrice, purchaseDate: Timestamp,
+                   productCategory: Category, clientIp: Ip)
 
   object CountryBlock {
     val schema: StructType = StructType(

@@ -4,7 +4,7 @@ import com.griddynamics.analytics.importers.EventsImporter
 import org.scalatest.FunSuite
 
 class DsEventsAnalyticsTest extends FunSuite with TrivialEventsImporter {
-  val analytics = DsEventsAnalytics(importer.importData())
+  val analytics = DsEventsAnalytics(eventsImporter.importData())
 
   test("topCategories DS works well on trivial input") {
     val result = analytics.topCategories().collect()
