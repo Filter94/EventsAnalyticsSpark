@@ -9,5 +9,9 @@ object RddEventsAndGeoDataAnalytics {
 }
 
 class RddEventsAndGeoDataAnalytics(events: RDD[Event], cb: RDD[CountryBlock], cl: RDD[CountryLocation]) {
-
+  def necessaryJoinedGeodata(): RDD[(Network, CountryName)] = {
+    val cbPair = cb.map(countryBlock => (countryBlock.geoname_id, countryBlock.network))
+    val clPair = cl.map(countryLocation => (countryLocation.geoname_id, countryLocation.country_name))
+    cbPair.join(clPair).values
+  }
 }
