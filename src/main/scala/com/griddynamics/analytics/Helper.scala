@@ -1,5 +1,8 @@
 package com.griddynamics.analytics
 
+import org.apache.spark.sql.expressions.UserDefinedFunction
+import org.apache.spark.sql.functions.udf
+
 object Helper {
   /**
     * @param ip string like "127.0.0.1"
@@ -13,7 +16,9 @@ object Helper {
     }
   }
 
-  val IP_LENGTH = 32
+  private val IP_LENGTH = 32
+  private val ipInNetFunc: (Ip, Network) => Boolean = Helper.ipInNet
+  val ipInNetUdf: UserDefinedFunction = udf(ipInNetFunc)
 
   /**
     * @param maskLen length of a mask to be generated

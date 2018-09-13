@@ -8,6 +8,7 @@ package object analytics {
   type Category = String
   type ProductName = String
   type ProductPrice = Float
+  type Sells = Double
   type Ip = String
 
   object Event {

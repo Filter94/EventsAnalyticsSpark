@@ -2,18 +2,13 @@ package com.griddynamics.analytics
 
 import com.griddynamics.analytics.SparkContextKeeper.spark
 import org.apache.spark.sql.Dataset
-import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.functions._
 import spark.implicits._
-import org.apache.spark.sql.functions.udf
 
 object DsEventsAndGeoDataAnalytics {
   def apply(events: Dataset[Event], cb: Dataset[CountryBlock],
             cl: Dataset[CountryLocation]): DsEventsAndGeoDataAnalytics =
     new DsEventsAndGeoDataAnalytics(events, cb, cl)
-
-  val ipInNetFunc: (Ip, Network) => Boolean = Helper.ipInNet
-  val ipInNetUdf: UserDefinedFunction = udf(ipInNetFunc)
 }
 
 class DsEventsAndGeoDataAnalytics(events: Dataset[Event], cb: Dataset[CountryBlock], cl: Dataset[CountryLocation]) {
@@ -25,7 +20,15 @@ class DsEventsAndGeoDataAnalytics(events: Dataset[Event], cb: Dataset[CountryBlo
 
   def necessaryJoinedEventsDataWithGeodata(): Dataset[(ProductPrice, CountryName)] = {
     events.join(necessaryJoinedGeodata(),
-      DsEventsAndGeoDataAnalytics.ipInNetUdf($"clientIp".as[Ip], $"network".as[Network]))
+      Helper.ipInNetUdf($"clientIp".as[Ip], $"network".as[Network]))
       .select($"productPrice".as[ProductPrice], $"country_name".as[CountryName])
+  }
+
+  def top10CountriesBySells(): Dataset[(Sells, CountryName)] = {
+    necessaryJoinedEventsDataWithGeodata()
+      .groupBy($"country_name".as[String])
+      .agg(sum($"productPrice").as("sells"))
+      .select($"sells".as[Sells], $"country_name".as[CountryName])
+      .orderBy($"sells" desc)
   }
 }

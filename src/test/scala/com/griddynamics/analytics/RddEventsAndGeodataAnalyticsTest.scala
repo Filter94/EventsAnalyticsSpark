@@ -10,7 +10,9 @@ class RddEventsAndGeodataAnalyticsTest extends FunSuite with TrivialEventsImport
     val cl = clImporter.importData().rdd
     val events = spark.createDataset[Event](Seq()).rdd
     val result = RddEventsAndGeoDataAnalytics(events, cb, cl).necessaryJoinedGeodata().collect()
-    assert(result.length == 3)
-    assert(result.toSet == Set(("1.0.0.0/24", "Руанда"), ("1.0.1.0/24", "Сомали"), ("1.0.2.0/23", "Сомали")))
+    assert(result.length == 4)
+    assert(result.toSet == Set(
+      ("1.0.0.0/24", "Руанда"), ("1.0.1.0/24", "Сомали"),
+      ("1.0.2.0/23", "Сомали"), ("3.2.2.0/23", "ЮАР")))
   }
 }

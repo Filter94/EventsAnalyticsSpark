@@ -29,9 +29,7 @@ class DsEventsAnalytics(events: Dataset[Event]) {
         orderBy $"purchases".desc)
     events
       .groupBy($"productCategory", $"productName")
-      .count()
-      .select($"productCategory".as[Category], $"productName".as[ProductName],
-        $"count".alias("purchases").as[DsEventsAnalytics.Purchases])
+      .agg(count($"productPrice").as("purchases"))
       .select($"productCategory".as[Category], $"productName".as[ProductName],
         $"purchases".as[Purchases], productPopularity.as("popularity"))
       .where($"popularity" <= 10)
