@@ -7,7 +7,7 @@ class DsEventsAnalyticsTest extends FunSuite with TrivialEventsImporter {
   val analytics = DsEventsAnalytics(eventsImporter.importData())
 
   test("topCategories DS works well on trivial input") {
-    val result = analytics.topCategories().collect()
+    val result = analytics.top10Categories().collect()
     assert(result.length == 2)
     assert(result === Array(("category 1", 2), ("category 2", 1)))
   }

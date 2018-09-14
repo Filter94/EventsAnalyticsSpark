@@ -14,12 +14,13 @@ object DsEventsAnalytics {
 }
 
 class DsEventsAnalytics(events: Dataset[Event]) {
-  def topCategories(): Dataset[(Category, DsEventsAnalytics.Purchases)] = {
+  def top10Categories(): Dataset[(Category, DsEventsAnalytics.Purchases)] = {
     events
       .groupBy($"productCategory")
       .count()
       .select($"productCategory".as[Category], $"count".alias("purchases").as[DsEventsAnalytics.Purchases])
       .sort($"purchases" desc)
+      .limit(10)
   }
 
   def top10ByCategory(): Dataset[(Category, ProductName, DsEventsAnalytics.Purchases)] = {

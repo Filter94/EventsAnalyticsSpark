@@ -30,5 +30,6 @@ class DsEventsAndGeoDataAnalytics(events: Dataset[Event], cb: Dataset[CountryBlo
       .agg(sum($"productPrice").as("sells"))
       .select($"sells".as[Sells], $"country_name".as[CountryName])
       .orderBy($"sells" desc)
+      .limit(10)
   }
 }

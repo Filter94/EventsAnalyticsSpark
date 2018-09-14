@@ -6,15 +6,15 @@ import com.griddynamics.analytics.CountryLocation
 import org.apache.spark.sql.Dataset
 
 object CountryLocationsImporter {
-  def apply(eventsDirectory: String): CountryLocationsImporter = new CountryLocationsImporter(eventsDirectory)
+  def apply(eventsDirectory: String*): CountryLocationsImporter = new CountryLocationsImporter(eventsDirectory: _*)
 }
 
-class CountryLocationsImporter(eventsDirectory: String) {
+class CountryLocationsImporter(eventsDirectory: String*) {
   def importData(): Dataset[CountryLocation] = {
     spark.read
       .schema(CountryLocation.schema)
       .option("header", "true")
-      .csv(eventsDirectory)
+      .csv(eventsDirectory: _*)
       .as[CountryLocation]
   }
 }
