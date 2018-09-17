@@ -1,27 +1,39 @@
 package com.griddynamics.analytics
 
+import com.griddynamics.analytics.exporters.DbExporter
 import com.griddynamics.analytics.importers.{CountryBlockImporter, CountryLocationsImporter, EventsImporter}
-import org.apache.spark.sql.{Dataset, SaveMode}
+import org.apache.spark.sql.{SaveMode, SparkSession}
 
 object Main extends App {
-  def loadDsToDbTable[T](ds: Dataset[T], dbConfig: DbConnectionConfiguration, tableName: String): Unit = {
-    ds.write
-      .mode(SaveMode.Overwrite)
-      .jdbc(dbConfig.jdbcUrl, tableName, dbConfig.properties)
-  }
+  val ARGS_NUM = 5
+  if (args.length == ARGS_NUM) {
+    val (sparkMaster, eventsFiles, countryBlockFiles, countryLocationsFiles, dbConf) =
+      (args(0), args(1), args(2), args(3), args(4))
+    val spark = SparkSession.builder()
+      .appName("Geodata analytics")
+      .config("spark.master", sparkMaster)
+      .getOrCreate()
+    val events = EventsImporter(spark, eventsFiles.split(","): _*).importData()
+    val countryBlocks = CountryBlockImporter(spark, countryBlockFiles.split(","): _*).importData()
+    val countryLocations = CountryLocationsImporter(spark, countryLocationsFiles.split(","): _*).importData()
 
-  if (args.length == 4) {
-    val events = EventsImporter(args(0).split(","): _*).importData()
-    val countryBlocks = CountryBlockImporter(args(1).split(","): _*).importData()
-    val countryLocations = CountryLocationsImporter(args(2).split(","): _*).importData()
-    val dbConnectionConfiguration = DbConnectionConfiguration(args(3))
-    val eventsAnalytics = DsEventsAnalytics(events)
-    val geodataAnalytics = DsEventsAndGeoDataAnalytics(events, countryBlocks, countryLocations)
-    loadDsToDbTable(eventsAnalytics.top10Categories(), dbConnectionConfiguration, "top_categories")
-    loadDsToDbTable(eventsAnalytics.top10ByCategory(), dbConnectionConfiguration, "top_10_by_category")
-    loadDsToDbTable(geodataAnalytics.top10CountriesBySells(), dbConnectionConfiguration, "top_10_countries")
+    val eventsAnalytics = DsEventsAnalytics(spark, events)
+    val geodataAnalytics = DsEventsAndGeoDataAnalytics(spark, events, countryBlocks, countryLocations)
+    val dbExporter = DbExporter(DbConnectionConfiguration(dbConf))
+
+    dbExporter.exportDsToDbTable(eventsAnalytics.top10Categories(),
+      "top_categories", SaveMode.Overwrite)
+    dbExporter.exportDsToDbTable(eventsAnalytics.top10ByCategory(),
+      "top_10_by_category", SaveMode.Overwrite)
+    dbExporter.exportDsToDbTable(geodataAnalytics.top10CountriesBySells(),
+      "top_10_countries", SaveMode.Overwrite)
   } else {
-    "4 parameters needed. First on is events path, second one is country blocks path," +
-      " third one is country locations path, fourth one is db.properties path."
+    """
+      |5 parameters needed:
+      |First one is spark master string,
+      |second on is events path,
+      |third one is country blocks path,
+      |fourth one is country locations path,
+      |fifth one is db.properties path.""".stripMargin
   }
 }

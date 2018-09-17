@@ -1,15 +1,16 @@
 package com.griddynamics.analytics.importers
 
 import com.griddynamics.analytics.Event
-import com.griddynamics.analytics.SparkContextKeeper.spark
-import org.apache.spark.sql.Dataset
-import spark.implicits._
+import org.apache.spark.sql.{Dataset, SparkSession}
 
 object EventsImporter {
-  def apply(eventsDirectory: String*): EventsImporter = new EventsImporter(eventsDirectory: _*)
+  def apply(spark: SparkSession, eventsDirectory: String*): EventsImporter =
+    new EventsImporter(spark, eventsDirectory: _*)
 }
 
-class EventsImporter(eventsDirectory: String*) {
+class EventsImporter(spark: SparkSession, eventsDirectory: String*) {
+  import spark.implicits._
+
   def importData(): Dataset[Event] = {
     spark.read
       .schema(Event.schema)

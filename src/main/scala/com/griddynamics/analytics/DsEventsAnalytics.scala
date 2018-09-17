@@ -1,19 +1,20 @@
 package com.griddynamics.analytics
 
-import org.apache.spark.sql.Dataset
-import SparkContextKeeper.spark
+import org.apache.spark.sql.{Dataset, SparkSession}
 import com.griddynamics.analytics.DsEventsAnalytics.Purchases
 import org.apache.spark.sql.expressions.Window
-import spark.implicits._
 import org.apache.spark.sql.functions._
 
 object DsEventsAnalytics {
   type Purchases = Long
 
-  def apply(events: Dataset[Event]): DsEventsAnalytics = new DsEventsAnalytics(events)
+  def apply(spark: SparkSession, events: Dataset[Event]): DsEventsAnalytics =
+    new DsEventsAnalytics(spark, events)
 }
 
-class DsEventsAnalytics(events: Dataset[Event]) {
+class DsEventsAnalytics(spark: SparkSession, events: Dataset[Event]) {
+  import spark.implicits._
+
   def top10Categories(): Dataset[(Category, DsEventsAnalytics.Purchases)] = {
     events
       .groupBy($"productCategory")
@@ -31,8 +32,8 @@ class DsEventsAnalytics(events: Dataset[Event]) {
     events
       .groupBy($"productCategory", $"productName")
       .agg(count($"productPrice").as("purchases"))
-      .select($"productCategory".as[Category], $"productName".as[ProductName],
-        $"purchases".as[Purchases], productPopularity.as("popularity"))
+      .select($"productCategory", $"productName",
+        $"purchases", productPopularity.as("popularity"))
       .where($"popularity" <= 10)
       .select($"productCategory".as[Category], $"productName".as[ProductName],
         $"purchases".as[Purchases])

@@ -3,8 +3,8 @@ package com.griddynamics.analytics
 import com.griddynamics.analytics.importers.EventsImporter
 import org.scalatest.FunSuite
 
-class DsEventsAnalyticsTest extends FunSuite with TrivialEventsImporter {
-  val analytics = DsEventsAnalytics(eventsImporter.importData())
+class DsEventsAnalyticsTest extends FunSuite with TrivialEventsImporter with LocalSparkContext {
+  val analytics = DsEventsAnalytics(spark, eventsImporter.importData())
 
   test("topCategories DS works well on trivial input") {
     val result = analytics.top10Categories().collect()
@@ -24,7 +24,7 @@ class DsEventsAnalyticsTest extends FunSuite with TrivialEventsImporter {
 
   test("top10ByCategory DS works well on some more complex input") {
     val complexCasePath = getClass.getResource("/events/complex.csv").getPath
-    val analytics = DsEventsAnalytics(EventsImporter(complexCasePath).importData())
+    val analytics = DsEventsAnalytics(spark, EventsImporter(spark, complexCasePath).importData())
     val result = analytics.top10ByCategory().collect()
     assert(result.length == 14)
     val category1 = result.filter{case (category, _, _) => category == "category 1"}

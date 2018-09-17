@@ -4,7 +4,7 @@ import java.sql.Timestamp
 
 import org.scalatest.FunSuite
 
-class EventsImporterTest extends FunSuite with TrivialEventsImporter {
+class EventsImporterTest extends FunSuite with TrivialEventsImporter with LocalSparkContext {
   test("All events are imported") {
     assert(eventsImporter.importData().count() == 3)
   }

@@ -1,10 +1,11 @@
 package com.griddynamics.analytics
 
-import com.griddynamics.analytics.SparkContextKeeper.spark
-import com.griddynamics.analytics.SparkContextKeeper.spark.implicits._
 import org.scalatest.FunSuite
 
-class RddEventsAndGeodataAnalyticsTest extends FunSuite with TrivialEventsImporter with TrivialGeodataImporter {
+class RddEventsAndGeodataAnalyticsTest extends FunSuite with TrivialEventsImporter with TrivialGeodataImporter
+  with LocalSparkContext {
+  import spark.implicits._
+
   test("Geodata RDD join works on trivial input") {
     val cb = cbImporter.importData().rdd
     val cl = clImporter.importData().rdd

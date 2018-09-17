@@ -16,7 +16,7 @@ class RddEventsAnalytics(events: RDD[Event]) {
         case (category, group) =>
           (category, group.count(_ => true))
       }
-      .sortBy {
+      .sortBy { // descending order
         case (_, purchases) => -purchases
       }
   }
@@ -30,7 +30,7 @@ class RddEventsAnalytics(events: RDD[Event]) {
     }
     for {
       (_, categoryGroup) <- productPurchasesByCategory
-        .sortBy{ case (_, _, purchases) => -purchases }
+        .sortBy{ case (_, _, purchases) => -purchases } // descending order
         .groupBy{ case (category, _, _) => category }
       record <- categoryGroup.take(10)
     } yield {

@@ -1,19 +1,19 @@
 package com.griddynamics.analytics
 
 import org.scalatest.FunSuite
-import com.griddynamics.analytics.SparkContextKeeper.spark
 import com.griddynamics.analytics.importers.EventsImporter
 import org.apache.spark.sql.Dataset
-import spark.implicits._
 
-class DsEventsAndGeodataAnalyticsTest extends FunSuite with TrivialEventsImporter with TrivialGeodataImporter {
+class DsEventsAndGeodataAnalyticsTest extends FunSuite with TrivialEventsImporter with TrivialGeodataImporter
+  with LocalSparkContext {
   val cb: Dataset[CountryBlock] = cbImporter.importData()
   val cl: Dataset[CountryLocation] = clImporter.importData()
-  val trivialAnalytics = DsEventsAndGeoDataAnalytics(eventsImporter.importData(), cb, cl)
+  val trivialAnalytics = DsEventsAndGeoDataAnalytics(spark, eventsImporter.importData(), cb, cl)
+  import spark.implicits._
 
   test("Geodata DS join works on trivial input") {
     val events: Dataset[Event] = spark.createDataset[Event](Seq())
-    val result = DsEventsAndGeoDataAnalytics(events, cb, cl).necessaryJoinedGeodata().collect()
+    val result = DsEventsAndGeoDataAnalytics(spark, events, cb, cl).necessaryJoinedGeodata().collect()
     assert(result.length == 4)
     assert(result.toSet == Set(
       ("1.0.0.0/24", "Руанда"), ("1.0.1.0/24", "Сомали"),
@@ -36,8 +36,8 @@ class DsEventsAndGeodataAnalyticsTest extends FunSuite with TrivialEventsImporte
 
   test("top 10 countries by sells works correct complex input") {
     val complexCasePath = getClass.getResource("/events/complex.csv").getPath
-    val complexEvents = EventsImporter(complexCasePath).importData()
-    val result = DsEventsAndGeoDataAnalytics(complexEvents, cb, cl)
+    val complexEvents = EventsImporter(spark, complexCasePath).importData()
+    val result = DsEventsAndGeoDataAnalytics(spark, complexEvents, cb, cl)
       .top10CountriesBySells()
       .collect()
     assert(result.length == 3)

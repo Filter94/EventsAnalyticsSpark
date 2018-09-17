@@ -1,15 +1,16 @@
 package com.griddynamics.analytics.importers
 
-import com.griddynamics.analytics.SparkContextKeeper.spark
-import spark.implicits._
 import com.griddynamics.analytics.CountryBlock
-import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.{Dataset, SparkSession}
 
 object CountryBlockImporter {
-  def apply(eventsDirectory: String*): CountryBlockImporter = new CountryBlockImporter(eventsDirectory: _*)
+  def apply(spark: SparkSession, eventsDirectory: String*): CountryBlockImporter =
+    new CountryBlockImporter(spark, eventsDirectory: _*)
 }
 
-class CountryBlockImporter(eventsDirectory: String*) {
+class CountryBlockImporter(spark: SparkSession, eventsDirectory: String*) {
+  import spark.implicits._
+
   def importData(): Dataset[CountryBlock] = {
     spark.read
       .schema(CountryBlock.schema)
