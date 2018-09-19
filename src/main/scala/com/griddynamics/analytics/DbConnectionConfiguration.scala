@@ -9,6 +9,6 @@ object DbConnectionConfiguration {
 
 class DbConnectionConfiguration(propertiesPath: String) {
   val properties = new Properties()
-  properties.load(getClass.getResourceAsStream(propertiesPath))
+  properties.load(getClass.getClassLoader.getResourceAsStream(propertiesPath))
   val jdbcUrl: String = properties.getProperty("jdbcUrl")
 }
