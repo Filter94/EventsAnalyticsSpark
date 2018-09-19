@@ -2,3 +2,4 @@ jdbcUrl=jdbc:mysql://127.0.0.1/spark_test
 user=user
 password=password
 serverTimezone=UTC
+useSSL=false

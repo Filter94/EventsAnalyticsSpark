@@ -13,27 +13,33 @@ object Main extends App {
       .appName("Geodata analytics")
       .config("spark.master", sparkMaster)
       .getOrCreate()
-    val events = EventsImporter(spark, eventsFiles.split(","): _*).importData()
-    val countryBlocks = CountryBlockImporter(spark, countryBlockFiles.split(","): _*).importData()
-    val countryLocations = CountryLocationsImporter(spark, countryLocationsFiles.split(","): _*).importData()
+    val events = EventsImporter(spark,
+      eventsFiles.split(","): _*)
+      .importData()
+    val countryBlocks = CountryBlockImporter(spark,
+      countryBlockFiles.split(","): _*)
+      .importData()
+    val countryLocations = CountryLocationsImporter(spark,
+      countryLocationsFiles.split(","): _*)
+      .importData()
 
     val eventsAnalytics = DsEventsAnalytics(spark, events)
     val geodataAnalytics = DsEventsAndGeoDataAnalytics(spark, events, countryBlocks, countryLocations)
     val dbExporter = DbExporter(DbConnectionConfiguration(dbConf))
 
     dbExporter.exportDsToDbTable(eventsAnalytics.top10Categories(),
-      "top_categories", SaveMode.Overwrite)
+      "purchased_categories", SaveMode.Overwrite)
     dbExporter.exportDsToDbTable(eventsAnalytics.top10ByCategory(),
-      "top_10_by_category", SaveMode.Overwrite)
+      "top_10_product_sells_by_category", SaveMode.Overwrite)
     dbExporter.exportDsToDbTable(geodataAnalytics.top10CountriesBySells(),
-      "top_10_countries", SaveMode.Overwrite)
+      "countries_by_money_spent", SaveMode.Overwrite)
   } else {
     """
       |5 parameters needed:
       |First one is spark master string,
-      |second on is events path,
-      |third one is country blocks path,
-      |fourth one is country locations path,
+      |second one are comma separated events paths,
+      |third one are comma separated country blocks paths,
+      |fourth one are comma separated country locations paths,
       |fifth one is db.properties path.""".stripMargin
   }
 }
