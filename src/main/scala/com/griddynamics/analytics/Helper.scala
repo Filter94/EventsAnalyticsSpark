@@ -70,7 +70,7 @@ object Helper {
     * @return true if ip is in the net
     */
   def ipInSubnet(ip: Int, net: Net): Boolean = {
-    (ip & net.mask) == (net.net & net.mask)
+    (ip & net.mask).compareTo(net.net & net.mask) == 0
   }
 
   /**
